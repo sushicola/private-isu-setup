@@ -23,10 +23,12 @@ open "http://$(docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.
 docker build -t private-isu-setup-cli:latest -f cli/Dockerfile \
   --build-arg AWS_ACCESS_KEY_ID=$(cat terraform.tfvars.json | grep -o '"access_key": "[^"]*' | grep -o '[^"]*$') \
   --build-arg AWS_SECRET_ACCESS_KEY=$(cat terraform.tfvars.json | grep -o '"secret_key": "[^"]*' | grep -o '[^"]*$') .
-docker run --rm -it private-isu-setup-cli:latest aws ssm start-session --target $(docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.3.6 output -raw instance_id) --document-name private-isu-admin
+
+docker run --rm -it private-isu-setup-cli:latest aws ssm start-session --document-name private-isu-admin \
+  --target $(docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.3.6 output -raw instance_id)
 
 # rootに切り替える
-sudo su --login 
+sudo su --login
 ```
 
 ## Destroy
