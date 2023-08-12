@@ -1,8 +1,8 @@
 # private-isu-setup
-## Note
-c5.largeインスタンスが起動します。
+## 注意
+c6i.xlargeインスタンスとc6i.largeインスタンスが起動します。
 
-## Setup
+## 各種リソースの作成
 ```shell
 # terraform.tfvars.jsonにAWSのクレデンシャルを記載する
 echo '{
@@ -18,20 +18,31 @@ docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.3.6 apply
 open "http://$(docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.3.6 output -raw public_ip)"
 ```
 
-## Access to EC2
+## インスタンスへのアクセス
+### 1. 準備
 ```shell
 docker build -t private-isu-setup-cli:latest -f cli/Dockerfile \
   --build-arg AWS_ACCESS_KEY_ID=$(cat terraform.tfvars.json | grep -o '"access_key": "[^"]*' | grep -o '[^"]*$') \
   --build-arg AWS_SECRET_ACCESS_KEY=$(cat terraform.tfvars.json | grep -o '"secret_key": "[^"]*' | grep -o '[^"]*$') .
-
-docker run --rm -it private-isu-setup-cli:latest aws ssm start-session --document-name private-isu-admin \
-  --target $(docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.3.6 output -raw instance_id)
-
-# rootに切り替える
-sudo su --login
 ```
 
-## Destroy
+### 2-a. 競技者用インスタンスへのアクセス
+```shell
+docker run --rm -it private-isu-setup-cli:latest aws ssm start-session --document-name private-isu-admin \
+  --target $(docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.3.6 output -raw private_isu_id)
+
+sudo su - isucon
+```
+
+### 2-b. ベンチマーカー用インスタンスへのアクセス
+```shell
+docker run --rm -it private-isu-setup-cli:latest aws ssm start-session --document-name private-isu-admin \
+  --target $(docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.3.6 output -raw benchmark_id)
+
+sudo su - isucon
+```
+
+## 各種リソースの削除
 ```shell
 docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.3.6 destroy
 ```

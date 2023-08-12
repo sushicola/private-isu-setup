@@ -11,6 +11,13 @@ resource "aws_eip" "private_isu" {
   vpc = true
 }
 
+resource "aws_instance" "benchmark" {
+  ami                    = local.benchmark_ami
+  instance_type          = local.benchmark_instance_type
+  iam_instance_profile = aws_iam_instance_profile.admin.name
+  subnet_id              = aws_subnet.public.id
+}
+
 resource "aws_security_group" "allow_http" {
   name   = "allow-http"
   vpc_id = aws_vpc.this.id
