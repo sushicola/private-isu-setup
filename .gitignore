@@ -3,6 +3,3 @@
 terraform.tfstate
 terraform.tfstate.backup
 terraform.tfvars.json
-
-credential/*
-!credential/.gitkeep

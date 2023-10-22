@@ -13,12 +13,9 @@ echo '{
 # SSHキーを作成
 ssh-keygen -f ~/.ssh/id_rsa.private_isu
 
-# SSHキーをコピー
-cp ~/.ssh/id_rsa.private_isu.pub ./credential/id_rsa.private_isu.pub
-
 # terraformを実行
-docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.3.6 init
-docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.3.6 apply
+docker run --rm -it -v $PWD:/work -v ~/.ssh:/.ssh -w /work hashicorp/terraform:1.3.6 init
+docker run --rm -it -v $PWD:/work -v ~/.ssh:/.ssh -w /work hashicorp/terraform:1.3.6 apply
 
 # 出力されたpublic_ipにアクセス(サーバー起動に少し時間がかかるので、少し待ってからアクセスする必要あり)
 open "http://$(docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.3.6 output -raw public_ip)"
@@ -34,8 +31,14 @@ docker build -t private-isu-setup-cli:latest -f cli/Dockerfile \
 
 ### 2-a. 競技者用インスタンスへのアクセス
 ```shell
+## SSM
 docker run --rm -it private-isu-setup-cli:latest aws ssm start-session --document-name private-isu-admin \
   --target $(docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.3.6 output -raw private_isu_id)
+
+sudo su - isucon
+
+## SSH
+ssh -i ~/.ssh/id_rsa.private_isu ubuntu@$(docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.3.6 output -raw public_ip)
 
 sudo su - isucon
 ```

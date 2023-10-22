@@ -62,5 +62,5 @@ resource "aws_security_group" "allow_ssh" {
 
 resource "aws_key_pair" "private_isu" {
   key_name   = "private_isu"
-  public_key = file("./credential/id_rsa.private_isu.pub")
+  public_key = file("/.ssh/id_rsa.private_isu.pub")
 }
