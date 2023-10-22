@@ -10,6 +10,12 @@ echo '{
   "secret_key": "<AWS_SECRET_KEY>"
 }' > terraform.tfvars.json
 
+# SSHキーを作成
+ssh-keygen -f ~/.ssh/id_rsa.private_isu
+
+# SSHキーをコピー
+cp ~/.ssh/id_rsa.private_isu.pub ./credential/id_rsa.private_isu.pub
+
 # terraformを実行
 docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.3.6 init
 docker run --rm -it -v $PWD:/work -w /work hashicorp/terraform:1.3.6 apply
